@@ -3,6 +3,7 @@ package strategy;
 import entity.Request;
 import interfaces.RateLimitStrategy;
 import entity.Rule;
+import java.util.*;
 
 public class TokenBucket implements RateLimitStrategy {
     private final int capacity;
@@ -17,14 +18,14 @@ public class TokenBucket implements RateLimitStrategy {
     }
     private void refill(String key){
         while(true){
+            synchronized(this){
+               this.tokens.put(key, Math.min(capacity, tokens.getOrDefault(key, 0) + tokensRate));
+            }
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
-            }
-            synchronized(this){
-               this.tokens.put(key, Math.min(capacity, tokens.getOrDefault(key, 0) + tokensRate));
             }
         }
     }
@@ -32,6 +33,7 @@ public class TokenBucket implements RateLimitStrategy {
     public boolean allowRequest(String key, Rule rule) {
         refillThread.putIfAbsent(key, new Thread(() -> refill(key)));
         if(!refillThread.get(key).isAlive()){
+            refillThread.get(key).setDaemon(true);
             refillThread.get(key).start();
         }
         synchronized(this){
@@ -42,5 +44,6 @@ public class TokenBucket implements RateLimitStrategy {
             } else {
                 return false;   
             }
+        }
     }
 }
