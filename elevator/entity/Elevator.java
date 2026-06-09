@@ -4,10 +4,10 @@ import enums.Direction;
 import service.ElevatorController;
 
 public class Elevator {
-    int id;
-    int currentFloor;
-    Direction direction;
-    ElevatorController elevatorController;
+    private final int id;
+    private int currentFloor;
+    private Direction direction;
+    private final ElevatorController elevatorController;
 
     public Elevator(int id) {
         this.id = id;
@@ -18,31 +18,20 @@ public class Elevator {
     public int getId() {
         return id;
     }
-    public int getCurrentFloor() {
+    public synchronized int getCurrentFloor() {
         return currentFloor;
     }
-    public Direction getDirection() {
+    public synchronized Direction getDirection() {
         return direction;
     }
 
     public synchronized void setCurrentFloor(int floor) {
-        Thread t = new Thread(() -> {
-            try {
-                int f;
-                for(f = currentFloor; f != floor; f += (floor > currentFloor ? 1 : -1)) {
-                    this.currentFloor = f;
-                    System.out.println("Elevator " + id + " is now at floor " + currentFloor);
-                    Thread.sleep(1000); // Simulate time taken to move between floors
-                }
-                this.currentFloor = f;
-                System.out.println("Elevator " + id + " is now at floor " + currentFloor);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-        t.start();
+        this.currentFloor = floor;
     }
-    public void setDirection(Direction direction) {
+    public synchronized void setDirection(Direction direction) {
+        if (this.direction == direction) {
+            return;
+        }
         this.direction = direction;
         System.out.println("Elevator " + id + " is now moving " + direction);
     }

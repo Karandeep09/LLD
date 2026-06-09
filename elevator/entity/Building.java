@@ -23,4 +23,8 @@ public class Building {
     public List<Floor> getFloors() {
         return floors;
     }
+
+    public ElevatorSystemController getElevatorSystemController() {
+        return elevatorSystemController;
+    }
 }
