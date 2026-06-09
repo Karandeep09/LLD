@@ -57,7 +57,7 @@ public class ElevatorController {
         startMovementIfNeeded();
     }
 
-    private void startMovementIfNeeded() {
+    private synchronized void startMovementIfNeeded() {
         if (!moving) {
             moving = true;
             Thread movementThread = new Thread(this::processDestinations);
@@ -66,7 +66,7 @@ public class ElevatorController {
         }
     }
 
-    private void processDestinations() {
+    private synchronized void processDestinations() {
         while (true) {
             Integer destination = getNextDestination();
             if (destination == null) {
@@ -118,7 +118,7 @@ public class ElevatorController {
         return destination;
     }
 
-    private void moveToFloor(int destinationFloor) {
+    private synchronized void moveToFloor(int destinationFloor) {
         try {
             while (elevator.getCurrentFloor() != destinationFloor) {
                 int currentFloor = elevator.getCurrentFloor();
