@@ -1,10 +1,10 @@
 package strategy;
-import interface.LimitingFactor;
+import interfaces.LimitingFactor;
 import entity.Request;
 
 public class IPBasedLimit implements LimitingFactor {
     @Override
     public String getKey(Request request) {
-        return request.getIpAddress();
+        return request.getIp();
     }
 }

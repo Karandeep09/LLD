@@ -1,7 +1,7 @@
 package strategy;
 
 import entity.Request;
-import interface.LimitingFactor;
+import interfaces.LimitingFactor;
 
 public class ClientEndpointBased implements LimitingFactor {
     @Override

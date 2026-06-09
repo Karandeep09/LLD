@@ -1,7 +1,7 @@
 package strategy;
 
 import entity.Request;
-import interface.RateLimitStrategy;
+import interfaces.RateLimitStrategy;
 import entity.Rule;
 
 public class TokenBucket implements RateLimitStrategy {

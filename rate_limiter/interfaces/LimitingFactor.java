@@ -1,4 +1,4 @@
-package interface;
+package interfaces;
 import entity.Request;
 
 public interface LimitingFactor {

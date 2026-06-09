@@ -1,5 +1,6 @@
 package strategy;
-import interface.RateLimitStrategy;
+import interfaces.RateLimitStrategy;
+import entity.Rule;
 import java.util.*;
 public class SlidingWindowLog implements RateLimitStrategy {
     Map<String, Queue<Long>> requestLogs;
@@ -12,10 +13,10 @@ public class SlidingWindowLog implements RateLimitStrategy {
         requestLogs.putIfAbsent(key, new LinkedList<>());
         Queue<Long> logs = requestLogs.get(key);
         logs.offer(currentTime);
-        while(!logs.isEmpty() && logs.peek() <= currentTime - rule.getWindowSize()){
+        while(!logs.isEmpty() && logs.peek() <= currentTime - rule.getTimeWindow()){
             logs.poll();
         }
-        return logs.size() <= rule.getLimit();
+        return logs.size() <= rule.getCount();
     }
 
 }

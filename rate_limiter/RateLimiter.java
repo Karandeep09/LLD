@@ -1,3 +1,7 @@
+import entity.Request;
+import entity.Rule;
+import interfaces.LimitingFactor;
+import interfaces.RateLimitStrategy;
 public class RateLimiter {
     private RateLimitStrategy strategy;
     private Rule rule;
