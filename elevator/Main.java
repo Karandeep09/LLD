@@ -12,6 +12,6 @@ public class Main {
         Thread.sleep(1500);
         new ElevatorButton(firstElevator, 7).press();
         Thread.sleep(1500);
-        building.getElevatorSystemController().dispatchElevator(Direction.DOWN, 5);
+        building.getElevatorSystemController().dispatchElevator(Direction.UP, 5);
     }
 }

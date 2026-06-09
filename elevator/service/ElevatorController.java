@@ -3,18 +3,18 @@ import entity.Elevator;
 import enums.Direction;
 import java.util.Collections;
 import java.util.PriorityQueue;
-
+import java.util.concurrent.atomic.AtomicBoolean;
 public class ElevatorController {
    private final PriorityQueue<Integer> downMaxPriorityQueue;
    private final PriorityQueue<Integer> upMinPriorityQueue;
    private final Elevator elevator;
-   private boolean moving;
+   private AtomicBoolean moving;
 
    public ElevatorController(Elevator elevator) {
         downMaxPriorityQueue = new PriorityQueue<>(Collections.reverseOrder());
         upMinPriorityQueue = new PriorityQueue<>();
         this.elevator = elevator;
-        this.moving = false;
+        this.moving = new AtomicBoolean(false);
    }
     public Elevator getElevator() {
         return elevator;
@@ -57,16 +57,16 @@ public class ElevatorController {
         startMovementIfNeeded();
     }
 
-    private synchronized void startMovementIfNeeded() {
-        if (!moving) {
-            moving = true;
+    private void startMovementIfNeeded() {
+        if (!moving.get()) {
+            moving.set(true);
             Thread movementThread = new Thread(this::processDestinations);
             movementThread.setName("elevator-" + elevator.getId() + "-movement");
             movementThread.start();
         }
     }
 
-    private synchronized void processDestinations() {
+    private void processDestinations() {
         while (true) {
             Integer destination = getNextDestination();
             if (destination == null) {
@@ -113,12 +113,12 @@ public class ElevatorController {
         }
 
         if (destination == null) {
-            moving = false;
+            moving.set(false);
         }
         return destination;
     }
 
-    private synchronized void moveToFloor(int destinationFloor) {
+    private void moveToFloor(int destinationFloor) {
         try {
             while (elevator.getCurrentFloor() != destinationFloor) {
                 int currentFloor = elevator.getCurrentFloor();
@@ -132,9 +132,7 @@ public class ElevatorController {
             System.out.println("Elevator " + elevator.getId() + " stopped at floor " + destinationFloor);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            synchronized (this) {
-                moving = false;
-            }
+            moving.set(false);
         }
     }
 
