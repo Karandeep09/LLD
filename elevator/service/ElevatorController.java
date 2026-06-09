@@ -8,13 +8,16 @@ public class ElevatorController {
    private final PriorityQueue<Integer> downMaxPriorityQueue;
    private final PriorityQueue<Integer> upMinPriorityQueue;
    private final Elevator elevator;
-   private AtomicBoolean moving;
+   private final AtomicBoolean moving;
+   private final Thread workerThread;
 
    public ElevatorController(Elevator elevator) {
         downMaxPriorityQueue = new PriorityQueue<>(Collections.reverseOrder());
         upMinPriorityQueue = new PriorityQueue<>();
         this.elevator = elevator;
         this.moving = new AtomicBoolean(false);
+        this.workerThread = new Thread(this::processDestinations, "elevator-" + elevator.getId() + "-movement");
+        this.workerThread.start();
    }
     public Elevator getElevator() {
         return elevator;
@@ -57,20 +60,26 @@ public class ElevatorController {
         startMovementIfNeeded();
     }
 
-    private void startMovementIfNeeded() {
+    private synchronized void startMovementIfNeeded() {
         if (!moving.get()) {
             moving.set(true);
-            Thread movementThread = new Thread(this::processDestinations);
-            movementThread.setName("elevator-" + elevator.getId() + "-movement");
-            movementThread.start();
+            notifyAll();
         }
     }
 
     private void processDestinations() {
-        while (true) {
-            Integer destination = getNextDestination();
-            if (destination == null) {
-                return;
+        while (!Thread.currentThread().isInterrupted()) {
+            Integer destination;
+            synchronized (this) {
+                while ((destination = getNextDestination()) == null) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        moving.set(false);
+                        return;
+                    }
+                }
             }
             moveToFloor(destination);
         }
